@@ -96,10 +96,28 @@
     const z = (state.zoom || 100) / 100;
     const tx = state.panX || 0;
     const ty = state.panY || 0;
-    const url = state.photoUrl
-      ? `url("${state.photoUrl}")`
-      : 'linear-gradient(135deg, #334155, #64748b 50%, #1e293b)';
-    return `background-image:${url};transform:translate(${tx}px,${ty}px) scale(${z});transform-origin:center center;`;
+    // Never put data: URLs in HTML style="" attributes (quotes break markup).
+    // background-image is applied in applyPhotoLayer() after render.
+    const bg = state.photoUrl
+      ? ''
+      : 'background-image:linear-gradient(135deg, #334155, #64748b 50%, #1e293b);';
+    return `${bg}transform:translate(${tx}px,${ty}px) scale(${z});transform-origin:center center;`;
+  }
+
+  function applyPhotoLayer() {
+    const z = (state.zoom || 100) / 100;
+    const tx = state.panX || 0;
+    const ty = state.panY || 0;
+    document.querySelectorAll('.photo-layer, .quote-photo').forEach((el) => {
+      if (state.photoUrl) {
+        el.style.backgroundImage = `url("${state.photoUrl}")`;
+        el.style.backgroundSize = 'cover';
+        el.style.backgroundPosition = 'center';
+        el.style.backgroundRepeat = 'no-repeat';
+      }
+      el.style.transform = `translate(${tx}px, ${ty}px) scale(${z})`;
+      el.style.transformOrigin = 'center center';
+    });
   }
 
   function brandBlock() {
@@ -203,6 +221,7 @@
         break;
     }
     root.innerHTML = html;
+    applyPhotoLayer();
     scalePreview();
     bindPhotoDrag();
   }
@@ -421,10 +440,29 @@
         pixelRatio: 1,
         cacheBust: true,
         skipAutoScale: true,
+        preferredFontFormat: 'woff2',
         style: { transform: 'none', margin: '0' }
       };
-      if (fontEmbedCSS) opts.fontEmbedCSS = fontEmbedCSS;
-      const dataUrl = await window.htmlToImage.toPng(root, opts);
+      if (fontEmbedCSS) {
+        opts.fontEmbedCSS = fontEmbedCSS;
+        opts.skipFonts = true; // use our embedded CSS only
+      } else {
+        opts.skipFonts = true;
+      }
+      let dataUrl;
+      try {
+        dataUrl = await window.htmlToImage.toPng(root, opts);
+      } catch (e) {
+        // Fallback without custom font CSS if SVG image load failed
+        dataUrl = await window.htmlToImage.toPng(root, {
+          width: root.offsetWidth,
+          height: root.offsetHeight,
+          pixelRatio: 1,
+          cacheBust: true,
+          skipFonts: true,
+          style: { transform: 'none', margin: '0' }
+        });
+      }
       if (!dataUrl || !dataUrl.startsWith('data:image')) {
         throw new Error('empty export');
       }

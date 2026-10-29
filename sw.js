@@ -1,4 +1,4 @@
-const CACHE = 'photocard-maker-v2';
+const CACHE = 'photocard-maker-v3';
 const ASSETS = [
   './',
   './index.html',
