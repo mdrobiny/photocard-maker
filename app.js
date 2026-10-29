@@ -349,17 +349,56 @@
     });
   }
 
+  let cachedFontEmbedCSS = null;
+
+  async function buildFontEmbedCSS() {
+    if (cachedFontEmbedCSS) return cachedFontEmbedCSS;
+    const sheets = Array.from(document.styleSheets);
+    let cssText = '';
+    for (const sheet of sheets) {
+      let href = '';
+      try { href = sheet.href || ''; } catch (_) { continue; }
+      if (!href || !href.includes('/fonts/fonts.css')) continue;
+      const res = await fetch(href, { cache: 'force-cache' });
+      let text = await res.text();
+      const urlRe = /url\((['"]?)(\.\/[^)'"]+\.woff2)\1\)/g;
+      const base = href.replace(/fonts\.css.*/, '');
+      const found = new Set();
+      let m;
+      while ((m = urlRe.exec(text))) found.add(m[2]);
+      for (const rel of found) {
+        const fontUrl = new URL(rel, base).href;
+        const fr = await fetch(fontUrl, { cache: 'force-cache' });
+        const buf = await fr.arrayBuffer();
+        let binary = '';
+        const bytes = new Uint8Array(buf);
+        const chunk = 0x8000;
+        for (let i = 0; i < bytes.length; i += chunk) {
+          binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+        }
+        const b64 = btoa(binary);
+        const dataUrl = `url(data:font/woff2;base64,${b64})`;
+        text = text.split(`url(${rel})`).join(dataUrl);
+        text = text.split(`url('${rel}')`).join(dataUrl);
+        text = text.split(`url("${rel}")`).join(dataUrl);
+      }
+      cssText += text;
+    }
+    cachedFontEmbedCSS = cssText;
+    return cssText;
+  }
+
   async function waitFonts() {
     try {
       if (document.fonts && document.fonts.ready) {
         await document.fonts.ready;
-        // Force-load selected family
         await document.fonts.load(`700 64px "${state.font}"`);
         await document.fonts.load(`400 34px "${state.font}"`);
+        await document.fonts.load(`800 64px "${state.font}"`);
       }
     } catch (_) {}
-    // Extra settle for Bangla shaping
-    await new Promise((r) => setTimeout(r, 120));
+    await buildFontEmbedCSS().catch(() => '');
+    await new Promise((r) => setTimeout(r, 80));
   }
 
   async function exportPng() {
@@ -368,7 +407,7 @@
     btn.disabled = true;
     toast('ফন্ট লোড হচ্ছে…');
     await waitFonts();
-    // Temporarily unscale for crisp export
+    const fontEmbedCSS = await buildFontEmbedCSS().catch(() => '');
     const prev = root.style.transform;
     const prevMb = root.style.marginBottom;
     const prevMr = root.style.marginRight;
@@ -376,14 +415,19 @@
     root.style.marginBottom = '0';
     root.style.marginRight = '0';
     try {
-      const dataUrl = await window.htmlToImage.toPng(root, {
+      const opts = {
         width: root.offsetWidth,
         height: root.offsetHeight,
         pixelRatio: 1,
         cacheBust: true,
         skipAutoScale: true,
         style: { transform: 'none', margin: '0' }
-      });
+      };
+      if (fontEmbedCSS) opts.fontEmbedCSS = fontEmbedCSS;
+      const dataUrl = await window.htmlToImage.toPng(root, opts);
+      if (!dataUrl || !dataUrl.startsWith('data:image')) {
+        throw new Error('empty export');
+      }
       root.style.transform = prev;
       root.style.marginBottom = prevMb;
       root.style.marginRight = prevMr;
