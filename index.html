@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+  <meta name="theme-color" content="#dc2626" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)" />
+  <meta name="description" content="ভাইরাল বাংলা নিউজ ফটোকার্ড তৈরি করুন — Robin Cents" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="ফটোকার্ড" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-180.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
+  <title>নিউজ ফটোকার্ড মেকার — Robin Cents</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@400;600;700;800&family=Baloo+Da+2:wght@400;600;700;800&family=Hind+Siliguri:wght@400;600;700&family=Noto+Serif+Bengali:wght@400;600;700;800&family=Tiro+Bangla:ital@0;1&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js"></script>
+  <style>
+    :root {
+      --bg: #f4f6fb;
+      --bg2: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --accent: #dc2626;
+      --accent2: #ef4444;
+      --shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+      --radius: 16px;
+      --tap: 48px;
+      --font-ui: "Hind Siliguri", system-ui, sans-serif;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0b1220; --bg2: #121a2b; --text: #f1f5f9; --muted: #94a3b8;
+        --border: #1e293b; --shadow: 0 8px 28px rgba(0,0,0,0.35);
+      }
+    }
+    html[data-theme="light"] {
+      --bg: #f4f6fb; --bg2: #ffffff; --text: #0f172a; --muted: #64748b;
+      --border: #e2e8f0; --shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    }
+    html[data-theme="dark"] {
+      --bg: #0b1220; --bg2: #121a2b; --text: #f1f5f9; --muted: #94a3b8;
+      --border: #1e293b; --shadow: 0 8px 28px rgba(0,0,0,0.35);
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-ui);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      line-height: 1.45;
+      padding-bottom: calc(28px + env(safe-area-inset-bottom));
+    }
+    .app { max-width: 720px; margin: 0 auto; padding: 14px 14px 48px; }
+    header.app-header {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      margin-bottom: 14px; padding-top: env(safe-area-inset-top);
+    }
+    .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .brand-mark {
+      width: 42px; height: 42px; border-radius: 12px; flex-shrink: 0;
+      background: linear-gradient(135deg, #dc2626, #f97316);
+      color: #fff; display: grid; place-items: center;
+      font-weight: 800; font-size: 18px; box-shadow: var(--shadow);
+    }
+    .brand h1 { margin: 0; font-size: 1.05rem; font-weight: 800; letter-spacing: -0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .brand p { margin: 0; color: var(--muted); font-size: 0.72rem; }
+    .header-actions { display: flex; gap: 8px; flex-shrink: 0; }
+    .icon-btn {
+      width: var(--tap); height: var(--tap); border-radius: 14px;
+      border: 1px solid var(--border); background: var(--bg2);
+      color: var(--text); font-size: 1.15rem; cursor: pointer;
+      display: grid; place-items: center; text-decoration: none;
+    }
+    .icon-btn svg { width: 22px; height: 22px; fill: currentColor; }
+    .card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 14px; margin-bottom: 12px;
+      box-shadow: var(--shadow);
+    }
+    .card h2 {
+      margin: 0 0 10px; font-size: 0.9rem; font-weight: 700;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .field { margin-top: 10px; }
+    .field:first-child { margin-top: 0; }
+    .field label {
+      display: block; font-size: 0.78rem; color: var(--muted);
+      margin-bottom: 5px; font-weight: 600;
+    }
+    .field input[type="text"], .field input[type="date"], .field textarea, .field select {
+      width: 100%; border-radius: 12px; border: 1.5px solid var(--border);
+      background: var(--bg); color: var(--text); padding: 12px 14px;
+      font-size: 1rem; font-family: inherit; outline: none;
+    }
+    .field textarea { min-height: 72px; resize: vertical; line-height: 1.5; }
+    .field input:focus, .field textarea:focus, .field select:focus { border-color: var(--accent); }
+    .hint { font-size: 0.72rem; color: var(--muted); margin-top: 5px; }
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .templates {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+    }
+    .tpl-btn {
+      border: 1.5px solid var(--border); background: var(--bg);
+      border-radius: 12px; padding: 10px 4px; cursor: pointer;
+      font-family: inherit; font-size: 0.68rem; font-weight: 700;
+      color: var(--text); text-align: center; min-height: 56px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    }
+    .tpl-btn .dot { width: 18px; height: 18px; border-radius: 6px; }
+    .tpl-btn.active { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--bg2)); color: var(--accent); }
+    .sizes { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .sizes label { cursor: pointer; position: relative; }
+    .sizes input { position: absolute; opacity: 0; pointer-events: none; }
+    .sizes span {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      min-height: 44px; border-radius: 12px; border: 1.5px solid var(--border);
+      background: var(--bg); font-weight: 700; font-size: 0.82rem;
+    }
+    .sizes input:checked + span {
+      border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--bg2)); color: var(--accent);
+    }
+    .chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chip {
+      border: 1.5px solid var(--border); background: var(--bg); color: var(--text);
+      border-radius: 999px; padding: 7px 12px; font-size: 0.78rem; font-weight: 700;
+      font-family: inherit; cursor: pointer;
+    }
+    .chip.active { border-color: var(--accent); background: var(--accent); color: #fff; }
+    .file-btn {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      min-height: var(--tap); border-radius: 12px; border: 1.5px dashed var(--border);
+      background: var(--bg); color: var(--muted); font-weight: 700; font-family: inherit;
+      cursor: pointer; width: 100%;
+    }
+    .file-btn input { display: none; }
+    .zoom-row { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+    .zoom-row input[type="range"] { flex: 1; }
+    .toggle {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      padding: 10px 0;
+    }
+    .toggle input { width: 44px; height: 26px; accent-color: var(--accent); }
+    .color-row { display: flex; align-items: center; gap: 10px; }
+    .color-row input[type="color"] {
+      width: 48px; height: 40px; border: none; background: none; cursor: pointer; padding: 0;
+    }
+    .preview-wrap {
+      position: sticky; top: 0; z-index: 5; background: var(--bg);
+      padding: 8px 0 12px; margin: 0 -2px;
+    }
+    .preview-stage {
+      width: 100%; max-width: 420px; margin: 0 auto;
+      background: #0f172a; border-radius: 14px; overflow: hidden;
+      box-shadow: var(--shadow); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      aspect-ratio: 1 / 1;
+    }
+    .preview-stage[data-ratio="1080x1350"] { aspect-ratio: 1080 / 1350; }
+    .preview-stage[data-ratio="1080x1920"] { aspect-ratio: 1080 / 1920; }
+    .preview-stage[data-ratio="1200x630"] { aspect-ratio: 1200 / 630; }
+    #cardRoot {
+      width: 1080px; height: 1080px;
+      transform-origin: top left;
+      position: relative; overflow: hidden;
+      background: #fff; flex-shrink: 0;
+      /* scale applied via JS */
+    }
+    .actions {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px;
+    }
+    .btn {
+      min-height: var(--tap); border: none; border-radius: 14px;
+      font-weight: 800; font-size: 0.95rem; font-family: inherit;
+      cursor: pointer; display: inline-flex; align-items: center;
+      justify-content: center; gap: 8px; padding: 0 14px;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #dc2626, #f97316);
+      color: #fff; box-shadow: 0 8px 20px rgba(220, 38, 38, 0.35);
+      grid-column: 1 / -1;
+    }
+    .btn-primary:disabled { opacity: 0.55; cursor: not-allowed; box-shadow: none; }
+    .btn-ghost {
+      background: var(--bg2); color: var(--text);
+      border: 1.5px solid var(--border);
+    }
+    footer.site-footer {
+      text-align: center; color: var(--muted); font-size: 0.78rem;
+      margin-top: 20px; line-height: 1.7;
+    }
+    footer.site-footer a.made-by {
+      display: inline-flex; align-items: center; gap: 8px;
+      color: var(--text); text-decoration: none; font-weight: 700;
+      padding: 8px 14px; border-radius: 999px;
+      border: 1px solid var(--border); background: var(--bg2);
+      box-shadow: var(--shadow); margin-bottom: 8px;
+    }
+    footer.site-footer a.made-by:hover { border-color: var(--accent); color: var(--accent); }
+    footer.site-footer a.made-by svg { width: 16px; height: 16px; fill: currentColor; }
+    .toast {
+      position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom));
+      transform: translateX(-50%) translateY(120%);
+      background: #0f172a; color: #fff; padding: 10px 16px; border-radius: 999px;
+      font-size: 0.85rem; font-weight: 600; z-index: 50;
+      transition: transform 0.25s ease; pointer-events: none; white-space: nowrap;
+      max-width: 90vw; overflow: hidden; text-overflow: ellipsis;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* ===== CARD TEMPLATES ===== */
+    .pc {
+      width: 100%; height: 100%; position: relative; overflow: hidden;
+      display: flex; flex-direction: column;
+      font-family: var(--card-font, "Hind Siliguri", sans-serif);
+      color: #0f172a; background: #fff;
+    }
+    .pc .photo-area {
+      position: relative; overflow: hidden; background: #1e293b;
+      flex: 1; min-height: 0;
+    }
+    .pc .photo-layer {
+      position: absolute; inset: 0;
+      background-size: cover; background-position: center;
+      background-repeat: no-repeat;
+      will-change: transform;
+    }
+    .pc .overlay {
+      position: absolute; inset: 0; pointer-events: none;
+    }
+    .pc .content {
+      position: relative; z-index: 2; padding: 48px 56px;
+    }
+    .pc .cat {
+      display: inline-block; font-weight: 800; font-size: 28px;
+      padding: 10px 22px; border-radius: 8px; letter-spacing: 0.02em;
+      background: var(--accent-color, #dc2626); color: #fff;
+      margin-bottom: 18px;
+    }
+    .pc .headline {
+      font-weight: 800; font-size: 64px; line-height: 1.25;
+      margin: 0 0 16px; word-break: break-word;
+    }
+    .pc .headline .hl { color: var(--accent-color, #dc2626); }
+    .pc .sub {
+      font-size: 34px; line-height: 1.4; opacity: 0.85; margin: 0;
+      font-weight: 600;
+    }
+    .pc .meta-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 24px; padding: 28px 56px; font-size: 26px; font-weight: 700;
+    }
+    .pc .brand-line {
+      display: flex; align-items: center; gap: 16px;
+    }
+    .pc .brand-logo {
+      width: 56px; height: 56px; border-radius: 12px; object-fit: cover;
+      background: #fff; flex-shrink: 0;
+    }
+    .pc .brand-name { font-weight: 800; font-size: 30px; }
+    .pc .date-line { opacity: 0.75; font-weight: 600; }
+    .pc .footer-bar {
+      padding: 18px 56px 28px; font-size: 24px; font-weight: 600;
+      opacity: 0.7; display: flex; justify-content: space-between; align-items: center;
+    }
+    .pc .wm {
+      position: absolute; right: 40px; bottom: 100px; z-index: 5;
+      font-size: 22px; font-weight: 700; opacity: 0.45;
+      background: rgba(0,0,0,0.35); color: #fff;
+      padding: 8px 16px; border-radius: 8px;
+      pointer-events: none;
+    }
+
+    /* breaking */
+    .pc.breaking { background: #fff; }
+    .pc.breaking .top-stripe {
+      height: 18px; background: var(--accent-color, #dc2626); flex-shrink: 0;
+    }
+    .pc.breaking .photo-area { flex: 1.15; }
+    .pc.breaking .content {
+      background: #fff; padding-top: 36px;
+    }
+    .pc.breaking .cat { background: var(--accent-color, #dc2626); }
+
+    /* classic */
+    .pc.classic { background: #fff; }
+    .pc.classic .photo-area { flex: 1.2; }
+    .pc.classic .content { background: #fff; }
+    .pc.classic .meta-bar { border-top: 3px solid #e2e8f0; }
+
+    /* dark */
+    .pc.dark { background: #0f172a; color: #fff; }
+    .pc.dark .photo-area { position: absolute; inset: 0; flex: none; }
+    .pc.dark .overlay {
+      background: linear-gradient(180deg, rgba(15,23,42,0.15) 0%, rgba(15,23,42,0.55) 40%, rgba(15,23,42,0.95) 100%);
+    }
+    .pc.dark .content {
+      margin-top: auto; padding-bottom: 20px;
+    }
+    .pc.dark .cat { background: var(--accent-color, #dc2626); }
+    .pc.dark .meta-bar, .pc.dark .footer-bar { color: #e2e8f0; position: relative; z-index: 2; }
+
+    /* quote */
+    .pc.quote {
+      background: linear-gradient(160deg, #0f172a, #1e293b);
+      color: #fff; align-items: center; justify-content: center; text-align: center;
+    }
+    .pc.quote .quote-photo {
+      width: 280px; height: 280px; border-radius: 50%;
+      background-size: cover; background-position: center;
+      border: 8px solid var(--accent-color, #dc2626);
+      margin: 80px auto 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+      flex-shrink: 0;
+    }
+    .pc.quote .qmark { font-size: 120px; line-height: 0.6; color: var(--accent-color, #dc2626); opacity: 0.9; font-family: Georgia, serif; }
+    .pc.quote .headline { font-size: 52px; padding: 0 72px; }
+    .pc.quote .sub { font-size: 32px; opacity: 0.8; padding: 0 72px; margin-top: 12px; }
+    .pc.quote .meta-bar { justify-content: center; margin-top: auto; width: 100%; }
+
+    /* sports */
+    .pc.sports { background: #052e16; color: #fff; }
+    .pc.sports .photo-area { position: absolute; inset: 0; flex: none; }
+    .pc.sports .overlay {
+      background: linear-gradient(135deg, rgba(5,46,22,0.75), rgba(20,83,45,0.55) 50%, rgba(5,46,22,0.9));
+    }
+    .pc.sports .accent-bar {
+      position: absolute; left: 0; top: 0; bottom: 0; width: 22px;
+      background: var(--accent-color, #22c55e); z-index: 3;
+    }
+    .pc.sports .content { margin-top: auto; padding-left: 72px; }
+    .pc.sports .cat { background: var(--accent-color, #22c55e); color: #052e16; }
+    .pc.sports .meta-bar, .pc.sports .footer-bar { position: relative; z-index: 2; padding-left: 72px; }
+
+    /* condolence */
+    .pc.condolence { background: #0a0a0a; color: #f5f5f5; }
+    .pc.condolence .photo-area {
+      flex: 0.9; filter: grayscale(1); margin: 48px 80px 0;
+      border-radius: 16px; border: 4px solid #333;
+    }
+    .pc.condolence .content { text-align: center; }
+    .pc.condolence .cat {
+      background: transparent; color: #a3a3a3; border: 2px solid #525252;
+      font-size: 24px; letter-spacing: 0.12em;
+    }
+    .pc.condolence .headline { font-size: 56px; font-weight: 700; }
+    .pc.condolence .meta-bar { justify-content: center; opacity: 0.7; }
+
+    /* celebration */
+    .pc.celebration {
+      background: linear-gradient(160deg, #7c2d12, #c2410c 40%, #f59e0b);
+      color: #fff;
+    }
+    .pc.celebration .photo-area {
+      flex: 0.95; margin: 48px 64px 0; border-radius: 24px;
+      border: 6px solid rgba(255,255,255,0.85);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    }
+    .pc.celebration .content { text-align: center; }
+    .pc.celebration .cat {
+      background: #fff; color: #c2410c; border-radius: 999px;
+    }
+    .pc.celebration .headline { text-shadow: 0 4px 20px rgba(0,0,0,0.25); }
+    .pc.celebration .meta-bar { justify-content: center; }
+
+    /* minimal */
+    .pc.minimal { background: #fafafa; color: #111; }
+    .pc.minimal .photo-area { flex: 1.3; }
+    .pc.minimal .content { padding: 40px 56px 20px; }
+    .pc.minimal .cat {
+      background: transparent; color: var(--accent-color, #dc2626);
+      padding: 0; font-size: 26px; margin-bottom: 12px;
+      border-bottom: 4px solid var(--accent-color, #dc2626);
+      border-radius: 0; display: inline-block;
+    }
+    .pc.minimal .headline { font-size: 58px; font-weight: 700; }
+    .pc.minimal .meta-bar { border-top: 1px solid #e5e5e5; padding-top: 24px; }
+
+    @media (max-width: 420px) {
+      .templates { grid-template-columns: repeat(4, 1fr); }
+      .tpl-btn { font-size: 0.62rem; padding: 8px 2px; min-height: 52px; }
+      .row-2 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">📰</div>
+        <div>
+          <h1>ফটোকার্ড মেকার</h1>
+          <p>Robin Cents · ভাইরাল নিউজ কার্ড</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <a class="icon-btn" href="https://github.com/mdrobiny" target="_blank" rel="noopener noreferrer" aria-label="GitHub — Robin" title="GitHub">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        </a>
+        <button class="icon-btn" id="themeBtn" type="button" aria-label="থিম বদলান" title="থিম">🌓</button>
+      </div>
+    </header>
+
+    <div class="preview-wrap">
+      <div class="preview-stage" id="previewStage" data-ratio="1080x1080">
+        <div id="cardRoot" aria-label="কার্ড প্রিভিউ"></div>
+      </div>
+    </div>
+
+    <section class="card">
+      <h2>🎨 টেমপ্লেট</h2>
+      <div class="templates" id="tplGrid"></div>
+    </section>
+
+    <section class="card">
+      <h2>📐 সাইজ</h2>
+      <div class="sizes" id="sizeSeg">
+        <label><input type="radio" name="size" value="1080x1080" checked /><span>১০৮০² FB/IG</span></label>
+        <label><input type="radio" name="size" value="1080x1350" /><span>১০৮০×১৩৫০</span></label>
+        <label><input type="radio" name="size" value="1080x1920" /><span>স্টোরি ৯:১৬</span></label>
+        <label><input type="radio" name="size" value="1200x630" /><span>লিংক কার্ড</span></label>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>✍️ লেখা</h2>
+      <div class="field">
+        <label for="headline">হেডলাইন (বড় বোল্ড)</label>
+        <textarea id="headline" rows="3" placeholder="প্রধান শিরোনাম লিখুন… *হাইলাইট* শব্দ তারকাচিহ্নে ঘিরুন"></textarea>
+        <div class="hint">হাইলাইট করতে শব্দকে *এভাবে* লিখুন</div>
+      </div>
+      <div class="field">
+        <label for="subtext">সাব-টেক্সট / কোট (ঐচ্ছিক)</label>
+        <textarea id="subtext" rows="2" placeholder="অতিরিক্ত লাইন বা উক্তি…"></textarea>
+      </div>
+      <div class="field">
+        <label>ক্যাটাগরি ট্যাগ</label>
+        <div class="chip-row" id="catChips"></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>🖼️ ছবি</h2>
+      <label class="file-btn">📷 ছবি আপলোড / পরিবর্তন
+        <input type="file" id="photoInput" accept="image/*" />
+      </label>
+      <div class="zoom-row">
+        <span style="font-size:0.78rem;color:var(--muted);font-weight:700">জুম</span>
+        <input type="range" id="photoZoom" min="100" max="250" value="100" />
+        <span style="font-size:0.78rem;color:var(--muted);font-weight:700">সরান</span>
+      </div>
+      <div class="hint">প্রিভিউতে ছবি টেনে সরান · জুম স্লাইডার ব্যবহার করুন</div>
+    </section>
+
+    <section class="card">
+      <h2>🏷️ ব্র্যান্ড ও ফুটার</h2>
+      <div class="row-2">
+        <div class="field">
+          <label for="brandName">সোর্স / ব্র্যান্ড</label>
+          <input type="text" id="brandName" value="Robin Cents" />
+        </div>
+        <div class="field">
+          <label for="siteName">ওয়েবসাইট / পেজ</label>
+          <input type="text" id="siteName" value="robincents.com" />
+        </div>
+      </div>
+      <div class="field">
+        <label class="file-btn">🖼️ লোগো আপলোড (ঐচ্ছিক)
+          <input type="file" id="logoInput" accept="image/*" />
+        </label>
+      </div>
+      <div class="row-2">
+        <div class="field">
+          <label for="dateInput">তারিখ</label>
+          <input type="date" id="dateInput" />
+        </div>
+        <div class="field">
+          <label for="fontSelect">বাংলা ফন্ট</label>
+          <select id="fontSelect">
+            <option value="Hind Siliguri">Hind Siliguri</option>
+            <option value="Noto Serif Bengali">Noto Serif Bengali</option>
+            <option value="Tiro Bangla">Tiro Bangla</option>
+            <option value="Baloo Da 2">Baloo Da 2</option>
+            <option value="Anek Bangla">Anek Bangla</option>
+          </select>
+        </div>
+      </div>
+      <div class="toggle">
+        <span style="font-weight:700;font-size:0.9rem">বাংলা অঙ্ক ও বাংলা তারিখ</span>
+        <input type="checkbox" id="bnDate" checked />
+      </div>
+      <div class="toggle">
+        <span style="font-weight:700;font-size:0.9rem">ওয়াটারমার্ক (ব্র্যান্ড টেক্সট)</span>
+        <input type="checkbox" id="watermark" />
+      </div>
+      <div class="field">
+        <label>অ্যাকসেন্ট রং</label>
+        <div class="color-row">
+          <input type="color" id="accentColor" value="#dc2626" />
+          <span id="accentHex" style="font-weight:700;font-size:0.9rem">#dc2626</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="actions">
+        <button class="btn btn-primary" id="exportBtn" type="button">⬇️ PNG ডাউনলোড</button>
+        <button class="btn btn-ghost" id="shareBtn" type="button">📤 শেয়ার</button>
+        <button class="btn btn-ghost" id="resetBtn" type="button">↺ রিসেট</button>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      <a class="made-by" href="https://github.com/mdrobiny" target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        Made by Robin · GitHub
+      </a>
+      <div>নিউজ ফটোকার্ড মেকার · Robin Cents<br />কোনো নিউজ আউটলেটের সাথে সম্পর্কিত নয়</div>
+    </footer>
+  </div>
+
+  <div class="toast" id="toast" role="status"></div>
+  <script src="app.js"></script>
+</body>
+</html>
